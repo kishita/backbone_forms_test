@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+{{response.include_files()}}
+</head>
+<body>
+    <h1 id="qunit-header">backbone-forms tests</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+    <div id="qunit-fixture">test markup, will be hidden</div>
+    
+    <div id="uiTest">
+      <div id="formContainer"></div>
+      <button class="validate">Validate</button>
+    </div>
+    <script>
+        $(function() {
+            Backbone.Form.setTemplates({
+              customField: '{{=XML(template)}}'
+            });
+          
+            var NestedModel = Backbone.Model.extend({
+              schema: {
+                name: { validators: ['required']},
+                email: { validators: ['required', 'email'] }
+              }
+            });
+            
+            var Model = Backbone.Model.extend({
+                schema: {
+                    email:      { dataType: 'email', validators: ['required', 'email'] },
+                    tel:        { type: 'Text', dataType: 'tel', validators: ['required'] },
+                    number:     { type: 'Number', validators: [/[0-9]+(?:\.[0-9]*)?/] },
+                    checkbox:   { type: 'Checkbox' },
+                    date:       { type: 'Date', help: 'Some help text' },
+                    datetime:   { type: 'DateTime' },
+                    list:       { type: 'List' },
+                    radio:      { type: 'Radio', options: ['Opt 1', 'Opt 2'] },
+                    checkboxes: { type: 'Checkboxes', options: ['Sterling', 'Lana', 'Cyril', 'Cheryl', 'Pam'] },
+                    object:     { type: 'Object', subSchema: {
+                      name: {},
+                      age:  { type: 'Number' }
+                    }},
+                    nestedModel: { type: 'NestedModel', model: NestedModel },
+                    customTemplate: { template: 'customField' },
+                    shorthand: 'Password'
+                }
+            });
+            
+            var model = new Model({
+                number: null,
+                checkbox: true,
+                list: ['item1', 'item2', 'item3']
+            });
+
+            var form = new Backbone.Form({
+                model: model,
+                fieldsets: [
+                    ['email', 'tel', 'number', 'checkbox', 'radio', 'checkboxes', 'customTemplate', 'shorthand'],
+                    { legend: 'jQuery UI editors', fields: ['date', 'datetime', 'list'] },
+                    { legend: 'Nested editors', fields: ['object', 'nestedModel'] }
+                ]
+            }).render();
+            
+            window.form = form;
+
+            $('#uiTest #formContainer').html(form.el);
+            
+            $('#uiTest button.validate').click(function() { form.validate() });
+        });
+    </script>
+</body>
+</html>
